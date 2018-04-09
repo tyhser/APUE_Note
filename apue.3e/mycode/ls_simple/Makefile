@@ -1,0 +1,4 @@
+INC = -I../../include
+CC = gcc
+ls:ls_simple.c ../../lib/error.o
+	$(CC) -o ls ls_simple.c ../../lib/error.o $(INC)
