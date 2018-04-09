@@ -35,4 +35,26 @@ void perror(const char *msg);
 	直接将程序名argv[0]传给perror
 
 ## 第二章 UNIX标准及实现
-
+### 2.8基本系统数据类型
+*Page* 47
+>caddr_t 内存地址（ 1 2 . 9节）
+clock_t 时钟滴答计数器（进程时间）
+comp_t 压缩的时钟滴答
+dev_t 设备号（主和次）
+fdse_t 文件描述符集
+fpos_t 文件位置
+gid_t 数值组ID
+ino_t i节点编号
+mode_t 文件类型，文件创建方式
+nlink_t 目录项的连接计数
+off_t 文件长度和位移量（带符号的）（lseek）
+pid_t 进程I D和进程组I D（带符号的）
+ptrdiff_t 两个指针相减的结果（带符号的）
+rlim_t 资源限制
+sigatomic_t 能原子地存取的数据类型
+sigset_t 信号集
+size_t 对象（例如字符串）长度（不带符号的）
+ssize_t 返回字节计数的函数（带符号的）（read, write）
+time_t 日历时间的秒计数器
+uid_t 数值用户ID
+> wchar_t 能表示所有不同的字符码
