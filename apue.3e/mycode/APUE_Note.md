@@ -1,3 +1,4 @@
+[Toc]
 # UNIX环境系统编程
 ## 第一章 UNIX基础知识
 ### 1.4文件和目录
@@ -127,3 +128,7 @@ void perror(const char *msg);
     <th>能表示所有不同的字符码</th>
   </tr>
 </table>
+
+## 第三章 文件I/O
+### 3.3  函数 open和 openat
+*Page* 50
