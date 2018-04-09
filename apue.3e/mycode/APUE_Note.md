@@ -34,5 +34,5 @@ void perror(const char *msg);
 * **标准UNIX惯例**
 	直接将程序名argv[0]传给perror
 
-## UNIX标准及实现
+## 第二章 UNIX标准及实现
 
