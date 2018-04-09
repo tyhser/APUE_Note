@@ -37,24 +37,93 @@ void perror(const char *msg);
 ## 第二章 UNIX标准及实现
 ### 2.8基本系统数据类型
 *Page* 47
->caddr_t 内存地址（ 1 2 . 9节）
-clock_t 时钟滴答计数器（进程时间）
-comp_t 压缩的时钟滴答
-dev_t 设备号（主和次）
-fdse_t 文件描述符集
-fpos_t 文件位置
-gid_t 数值组ID
-ino_t i节点编号
-mode_t 文件类型，文件创建方式
-nlink_t 目录项的连接计数
-off_t 文件长度和位移量（带符号的）（lseek）
-pid_t 进程I D和进程组I D（带符号的）
-ptrdiff_t 两个指针相减的结果（带符号的）
-rlim_t 资源限制
-sigatomic_t 能原子地存取的数据类型
-sigset_t 信号集
-size_t 对象（例如字符串）长度（不带符号的）
-ssize_t 返回字节计数的函数（带符号的）（read, write）
-time_t 日历时间的秒计数器
-uid_t 数值用户ID
-> wchar_t 能表示所有不同的字符码
+<table>
+  <tr>
+    <th>参数</th>
+    <th>详细解释</th>
+  </tr>
+  <tr>
+    <th> caddr_t </th>
+    <th> 内存地址 </th>
+  </tr>
+  <tr>
+    <th>clock_t </th>
+    <th> 时钟滴答计数器（进程时间） </th>
+  <tr>
+    <th>comp_t </th>
+    <th> 压缩的时钟滴答 </th>
+  </tr>
+  <tr>
+    <th>dev_t</th>
+    <th>设备号(主和次)</th>
+    </tr>
+  <tr>
+    <th>fpos_t</th>
+    <th>文件位置</th>
+  </tr>
+  <tr>
+    <th>gid_t</th>
+    <th>数值组ID</th>
+  </tr>
+  <tr>
+    <th>ino_t</th>
+    <th>i节点编号</th>
+  </tr>
+  <tr>
+    <th>mode_t</th>
+    <th> 文件类型，文件创建方式
+</th>
+  </tr>
+  <tr>
+    <th>nlink_t</th>
+    <th>目录项的连接计数</th>
+  </tr>
+  <tr>
+    <th>off_t</th>
+    <th> 文件长度和位移量(带符号的)(lseek)
+</th>
+  </tr>
+  <tr>
+    <th>pid_t</th>
+    <th> 进程ID和进程组ID(带符号的)
+</th>
+  </tr>
+  <tr>
+    <th>ptrdiff_t</th>
+    <th> 两个指针相减的结果(带符号的)
+</th>
+  </tr>
+  <tr>
+    <th>rlim_t</th>
+    <th>资源限制</th>
+  </tr>
+  <tr>
+    <th>sigatomic_t</th>
+    <th>能原子地存取的数据类型</th>
+  </tr>
+  <tr>
+    <th>sigset_t</th>
+    <th>信号集</th>
+  </tr>
+  <tr>
+    <th>size_t</th>
+    <th> 对象(例如字符串)长度(不带符号的)
+</th>
+  </tr>
+  <tr>
+    <th>ssize_t</th>
+    <th>返回字节计数的函数(带符号的)(read, write)</th>
+  </tr>
+  <tr>
+    <th>time_t</th>
+    <th>日历时间的秒计数器</th>
+  </tr>
+  <tr>
+    <th>uid_t</th>
+    <th>数值用户ID</th>
+  </tr>
+  <tr>
+    <th>wchar_t</th>
+    <th>能表示所有不同的字符码</th>
+  </tr>
+</table>
