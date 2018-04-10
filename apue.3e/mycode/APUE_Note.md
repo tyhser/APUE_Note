@@ -73,7 +73,7 @@ int creat(const chat *path, mode_t mode);
 *Page* 53
 1. 关闭文件会自动释放进程加在文件上的所有记录锁
 2. 进程终止时内核自动关闭打开的所有文件
-### 3.6函数 lseek
+### 3.6 函数 lseek
 *Page* 53
 1. 通常读写操作都从当前文件偏移量开始，并偏移增加读写的字节数
 2. 除非指定**O_APPEND**选项，否则打开文件时偏移量都为0
@@ -87,3 +87,30 @@ off_t lseek(int fd, off_t offset, int whence);
 > 可用SEEK_CUR**确定当前偏移量**
 * 若whence是SEEK_END，则偏移量是文件长度加offset字节（可正可负）
 
+### 3.7 函数read
+*Page* 57
+```C
+#include <unistd.h>
+ssize_t read(int fd, void *buf, size_t nbytes);
+//返回值：读到的字节数，若已到文件尾，返回0若出错,返回-1
+```
+* 返回字节数少于所要求的情况：
+	* 网络的缓冲机制可能造成
+	* 从管道或FIFO读
+	* 从某些面向记录的设备（如磁带）读，一次最多返回一个记录
+	* 当信号造成中断，已经读了部分数据
+	* 从终端设备一次最多一行（可变）
+	* 读普通文件提前到达文尾
+	
+### 3.8 函数 write
+```C
+#include <unistd.h>
+ssize_t write(int fd, const void *buf, size_t nbytes);
+//返回值： 成功，返回已写的字节数;出错，返回-1
+```
+*  一般返回值和参数nbytes相同， 否则出错，如磁盘满或超出文件长度限制
+
+### 3.9 I/O的效率
+*Page* 59
+带缓冲的I/O利用了预读技术，效率更高
+### 3.10 文件共享
