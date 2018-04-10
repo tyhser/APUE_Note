@@ -38,97 +38,52 @@ void perror(const char *msg);
 ## 第二章 UNIX标准及实现
 ### 2.8基本系统数据类型
 *Page* 47
-<table>
-  <tr>
-    <th>参数</th>
-    <th>详细解释</th>
-  </tr>
-  <tr>
-    <th> caddr_t </th>
-    <th> 内存地址 </th>
-  </tr>
-  <tr>
-    <th>clock_t </th>
-    <th> 时钟滴答计数器（进程时间） </th>
-  <tr>
-    <th>comp_t </th>
-    <th> 压缩的时钟滴答 </th>
-  </tr>
-  <tr>
-    <th>dev_t</th>
-    <th>设备号(主和次)</th>
-    </tr>
-  <tr>
-    <th>fpos_t</th>
-    <th>文件位置</th>
-  </tr>
-  <tr>
-    <th>gid_t</th>
-    <th>数值组ID</th>
-  </tr>
-  <tr>
-    <th>ino_t</th>
-    <th>i节点编号</th>
-  </tr>
-  <tr>
-    <th>mode_t</th>
-    <th> 文件类型，文件创建方式
-</th>
-  </tr>
-  <tr>
-    <th>nlink_t</th>
-    <th>目录项的连接计数</th>
-  </tr>
-  <tr>
-    <th>off_t</th>
-    <th> 文件长度和位移量(带符号的)(lseek)
-</th>
-  </tr>
-  <tr>
-    <th>pid_t</th>
-    <th> 进程ID和进程组ID(带符号的)
-</th>
-  </tr>
-  <tr>
-    <th>ptrdiff_t</th>
-    <th> 两个指针相减的结果(带符号的)
-</th>
-  </tr>
-  <tr>
-    <th>rlim_t</th>
-    <th>资源限制</th>
-  </tr>
-  <tr>
-    <th>sigatomic_t</th>
-    <th>能原子地存取的数据类型</th>
-  </tr>
-  <tr>
-    <th>sigset_t</th>
-    <th>信号集</th>
-  </tr>
-  <tr>
-    <th>size_t</th>
-    <th> 对象(例如字符串)长度(不带符号的)
-</th>
-  </tr>
-  <tr>
-    <th>ssize_t</th>
-    <th>返回字节计数的函数(带符号的)(read, write)</th>
-  </tr>
-  <tr>
-    <th>time_t</th>
-    <th>日历时间的秒计数器</th>
-  </tr>
-  <tr>
-    <th>uid_t</th>
-    <th>数值用户ID</th>
-  </tr>
-  <tr>
-    <th>wchar_t</th>
-    <th>能表示所有不同的字符码</th>
-  </tr>
-</table>
 
 ## 第三章 文件I/O
 ### 3.3  函数 open和 openat
 *Page* 50
+```C
+#include <fcntl.h>
+int open(const char *path, int oflag,.../*mode_t mode*/);
+int openat(int dirfd, const char *path, int oflag,.../*mode_t mode*/);
+/*
+两函数返回值：若成功返回文件描述符;若出错， 返回-1
+openat要求事先获取目录描述符，再传入， 如：使用opendir将返回的指针用dirfd转成目录描述符或直接用open打开目录
+*/
+```
+* 同一进程中的所有线程共享相同的当前工作目录，可用openat让多个不同的线程**同时在不同目录工作**
+* 基于文件的两个函数调用，第二个依赖第一个结果时，在调用间隙文件可能被改变(TOCTTOU错误)
+* **oflag**参数中和**读写同步相关的**：
+	**1. O_SYNC**: 
+    *每次write等待物理I/O操作完成*
+	**2. O_DSYNC**: 
+    *每次write等待物理I/O操作完成，但如果写操作不影响读取刚写入的数据，则不需等待文件属性被更新*
+	**3. O_RSYNC**:
+    *使每一个以文件描述符作为参数进行的read操作等待，直至所有对文件同一部分挂起的写操作都完成*
+### 3.4函数 creat
+*Page* 52
+create函数** 只能创建只写文件 **
+```C
+#include <fcntl.h>
+int creat(const chat *path, mode_t mode);
+//返回值：若成功，返回为只写打开的文件描述符；若出错，返回-1
+//可用open代替
+```
+### 3.5函数 close
+*Page* 53
+1. 关闭文件会自动释放进程加在文件上的所有记录锁
+2. 进程终止时内核自动关闭打开的所有文件
+### 3.6函数 lseek
+*Page* 53
+1. 通常读写操作都从当前文件偏移量开始，并偏移增加读写的字节数
+2. 除非指定**O_APPEND**选项，否则打开文件时偏移量都为0
+```C
+#include <unistd.h>
+off_t lseek(int fd, off_t offset, int whence);
+//返回值：若成功，返回新的文件偏移量；若出错，返回为-1
+```
+* 若whence是SEEK_SET，则偏移量是距文件开始处offset字节
+* 若whence是SEEK_CUR，则偏移量是当前值增加offset字节（可正可负）	
+> 可用SEEK_CUR**确定当前偏移量**
+* 若whence是SEEK_END，则偏移量是文件长度加offset字节（可正可负）
+
