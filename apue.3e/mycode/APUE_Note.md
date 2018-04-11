@@ -1,4 +1,3 @@
-[Toc]
 # UNIX环境系统编程
 ## 第一章 UNIX基础知识
 ### 1.4文件和目录
@@ -137,8 +136,37 @@ ssize_t pwrite(int fd, const *buf, size_t nbytes, off_t offset);
 当文件存在，errno == EEXIST
 #### 3.12 函数dup和dup2
 *Page* 63
-![e](<https://img-blog.csdn.net/20140831224917875?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast>)
+![c](https://raw.githubusercontent.com/tyhser/APUE_Note/master/%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6%2C%E6%89%93%E5%BC%80%E7%9A%84%E6%96%87%E4%BB%B6%E5%8F%A5%E6%9F%84%E4%BB%A5%E5%8F%8Ai-node%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB.png)
 * 由于进程级文件描述符表的存在，不同的进程中会出现相同的文件描述符，它们可能指向同一个文件，也可能指向不同的文件
-* 两个不同的文件描述符，若指向同一个打开文件句柄，将共享同一文件偏移量。因此，如果通过其中一个文件描述符来修改文件偏移量（由调用read()、write()或lseek()所致），那么从另一个描述符中也会观察到变化，无论这两个文件描述符是否属于不同进程，还是同一个进程，情况都是如此。
+* 两个不同的文件描述符，若指向同一个打开文件句柄(系统维护)，将共享同一文件偏移量。因此，如果通过其中一个文件描述符来修改文件偏移量（由调用read()、write()或lseek()所致），那么从另一个描述符中也会观察到变化，无论这两个文件描述符是否属于不同进程，还是同一个进程，情况都是如此。
 * 要获取和修改打开的文件标志（例如：O_APPEND、O_NONBLOCK和O_ASYNC），可执行fcntl()的F_GETFL和F_SETFL操作，其对作用域的约束与上一条颇为类似。
 * 文件描述符标志（即，close-on-exec）为进程和文件描述符所私有。对这一标志的修改将不会影响同一进程或不同进程中的其他文件描述符
+-------------------------------------
+```C
+#include <unistd.h>
+int dup(int fd);
+int dup2(int fd, int fd2);
+//两函数的返回值：若成功，返回新的文件描述符若出错，返回-1
+//用于复制现有描述符
+```
+**复制后的文件描述符指向同一个文件表项，所以共享文件状态标志和偏移量**
+
+#### 3.13 函数sync、fsync、fdatasync
+*Page* 65
+* 保证实际文件内容和缓冲区内容一致的函数
+```C
+#include <unistd.h>
+int fsync(int fd);		//更新数据部分和文件属性
+int fdatasync(int fd);	//只影响数据部分，不更新文件属性
+//以上两函数等待磁盘操作结束才返回
+//返回值：若成功，返回0;若出错，返回-1
+void sync(void);//只将所有修改过的块缓冲区排入写队列，然后返回，不等待磁盘操作
+```
+#### 3.14 函数fcntl
+*Page* 65
+* 用于改变已经打开的文件的属性
+```C
+#include <fcntl.h>
+int fcntl(int fd, int cmd, .../*int arg*/);
+//返回值：若成功，则依赖于cmd;若出错，返回-1
+```

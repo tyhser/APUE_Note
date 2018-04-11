@@ -15,6 +15,26 @@ void fun_open_test(void)
 	else
 		printf("created a.txt\n");
 }
+void fork_fd_test(void)
+{
+	int fd1, fd2, fd3, nr;
+	char buff[20];
+	pid_t pid;
+	fd1 = open("data.in", O_RDWR);
+	pid = fork();
+	if (pid == 0)
+	{
+		nr = read(fd1, buff, 10);
+		buff[nr] = '\0';
+		printf("pid:%d content: %s\n", getpid(), buff);
+		exit(0);
+	}
+
+	nr = read(fd1, buff,10);
+	buff[nr] = '\0';
+	printf("pid:%d content: %s\n", getpid(), buff);
+}
+
 int main(int argc, char **argv)
 {
 	long num_procs;  
@@ -36,6 +56,6 @@ int main(int argc, char **argv)
     	free_mem = (long long)free_pages * (long long)page_size;  
     	free_mem /= ONE_MB;  
     	printf ("总共有 %lld MB 的物理内存, 空闲的物理内存有: %lld MB\n", mem, free_mem);  
-	fun_open_test();
+	fork_fd_test();
     	return (0);  
 }
