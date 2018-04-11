@@ -51,8 +51,9 @@ int openat(int dirfd, const char *path, int oflag,.../*mode_t mode*/);
 openat要求事先获取目录描述符，再传入， 如：使用opendir将返回的指针用dirfd转成目录描述符或直接用open打开目录
 */
 ```
-* 同一进程中的所有线程共享相同的当前工作目录，可用openat让多个不同的线程**同时在不同目录工作**
-* 基于文件的两个函数调用，第二个依赖第一个结果时，在调用间隙文件可能被改变(TOCTTOU错误)
+* openat**优点**：
+	* 同一进程中的所有线程共享相同的当前工作目录，可用openat让多个不同的线程**同时在不同目录工作**
+	* 防止基于文件的两个函数调用，第二个依赖第一个结果时，在调用间隙文件可能被改变(TOCTTOU错误)
 * **oflag**参数中和**读写同步相关的**：
 	**1. O_SYNC**: 
     *每次write等待物理I/O操作完成*
@@ -114,3 +115,30 @@ ssize_t write(int fd, const void *buf, size_t nbytes);
 *Page* 59
 带缓冲的I/O利用了预读技术，效率更高
 ### 3.10 文件共享
+*Page* 60~61
+不同进程有**相同或不同的进程表项和文件表项**，即不同的进程中的不同文件描述符对应不同的文件表项(不同的偏移量和状态标志)，但是可能指向**同一个V节点表项**(linux中与文件系统无关的通用i节点结构)
+[书中图3-8]
+### 3.11 文件读写的原子操作
+*Page* 62
+#### 1. 追加文件
+使用O_APPEND标志的写操作将*定位到尾部*和*写*封装成原子操作，避免了其他进程在该进程尾部后改变
+#### 2. 函数pread和pwrite
+```C
+#include <unistd.h>
+ssize_t pread(int fd, void *buf, ssize_t nbytes, off_t offset);
+//返回值：读到的字节数，若到文尾，返回0;若出错，返回-1
+ssize_t pwrite(int fd, const *buf, size_t nbytes, off_t offset);
+//返回值：若成功，返回已写的字节数；若出错，返回-1
+```
+* 调用pread时，法中断定位和读操作
+* 不更新当前文件偏移量
+#### 3. 创建一个文件
+使用**O_CREAT**和**O_EXCL**创建文件是原子操作，如果存在则open失败
+当文件存在，errno == EEXIST
+#### 3.12 函数dup和dup2
+*Page* 63
+![e](<https://img-blog.csdn.net/20140831224917875?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY3l3b3Nw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast>)
+* 由于进程级文件描述符表的存在，不同的进程中会出现相同的文件描述符，它们可能指向同一个文件，也可能指向不同的文件
+* 两个不同的文件描述符，若指向同一个打开文件句柄，将共享同一文件偏移量。因此，如果通过其中一个文件描述符来修改文件偏移量（由调用read()、write()或lseek()所致），那么从另一个描述符中也会观察到变化，无论这两个文件描述符是否属于不同进程，还是同一个进程，情况都是如此。
+* 要获取和修改打开的文件标志（例如：O_APPEND、O_NONBLOCK和O_ASYNC），可执行fcntl()的F_GETFL和F_SETFL操作，其对作用域的约束与上一条颇为类似。
+* 文件描述符标志（即，close-on-exec）为进程和文件描述符所私有。对这一标志的修改将不会影响同一进程或不同进程中的其他文件描述符

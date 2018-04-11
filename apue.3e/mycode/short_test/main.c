@@ -1,6 +1,20 @@
-#include <stdio.h>
-#include <unistd.h>
+#include "apue.h"
+#include <fcntl.h>
+#include <errno.h>
 #define ONE_MB (1024 * 1024)
+
+void fun_open_test(void)
+{
+	int fd;
+	if ((fd = open("a.txt", O_CREAT|O_EXCL, 0777)) < 0)
+	{
+		err_sys("open error");
+		if (errno == EEXIST)
+			printf("then ....");
+	}
+	else
+		printf("created a.txt\n");
+}
 int main(int argc, char **argv)
 {
 	long num_procs;  
@@ -22,5 +36,6 @@ int main(int argc, char **argv)
     	free_mem = (long long)free_pages * (long long)page_size;  
     	free_mem /= ONE_MB;  
     	printf ("总共有 %lld MB 的物理内存, 空闲的物理内存有: %lld MB\n", mem, free_mem);  
+	fun_open_test();
     	return (0);  
 }
