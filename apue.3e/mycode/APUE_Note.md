@@ -39,6 +39,7 @@ void perror(const char *msg);
 *Page* 47
 
 ## 第三章 文件I/O
+[Linux 中直接 I/O 机制的介绍](https://www.ibm.com/developerworks/cn/linux/l-cn-directio/)
 ### 3.3  函数 open和 openat
 *Page* 50
 ```C
@@ -151,7 +152,7 @@ int dup2(int fd, int fd2);
 ```
 **复制后的文件描述符指向同一个文件表项，所以共享文件状态标志和偏移量**
 
-#### 3.13 函数sync、fsync、fdatasync
+### 3.13 函数sync、fsync、fdatasync
 *Page* 65
 * 保证实际文件内容和缓冲区内容一致的函数
 ```C
@@ -162,11 +163,38 @@ int fdatasync(int fd);	//只影响数据部分，不更新文件属性
 //返回值：若成功，返回0;若出错，返回-1
 void sync(void);//只将所有修改过的块缓冲区排入写队列，然后返回，不等待磁盘操作
 ```
-#### 3.14 函数fcntl
+### 3.14 函数fcntl
 *Page* 65
 * 用于改变已经打开的文件的属性
 ```C
 #include <fcntl.h>
 int fcntl(int fd, int cmd, .../*int arg*/);
 //返回值：若成功，则依赖于cmd;若出错，返回-1
+```
+* fcntl函数有5种功能：
+	* 复制一个已有的描述符(cmd = F_DUPFD 或F_DUPFD_CLOEXEC)
+	* 获取/设置文件描述符标志(cmd = F_GETFD 或 F_SETFD)
+	* 获取/设置文件状态标志(cmd = F_GETFL 或 F_SETFL)
+	* 获取/设置异步I/O所有权(cmd = F_GETOWN 或 F_SETOWN)
+	* 获取/设置记录锁(cmd = F_GETLK、F_SETLK、F_SETLKW)
+ 要取得文件访问方式位<值为0,1,2>(不包括O_EXEC)返回值必须要**和O_ACCMODE<0x0003>位与操作后**再用switch比较出结果，因为需要屏蔽其他位
+### 3.15 函数ioctl
+*Page* 70
+ ```C
+ #include <unistd.h>	/*System V*/
+ #include <sys/ioctl.h>	/*BSD and Linux*/
+ int ioctl(int fd, int request, ...);
+ //返回值：若出错，返回-1;若成功，返回其他值
+ ```
+### 3.16 /dev/fd
+把文件描述符映射成底层物理文件的符号链接，打开相当于复制文件描述符
+## 第四章 文件和目录
+### 4.2 函数stat、fstat、fstatat、lstat
+```C
+#include <sys/stat.h>
+int stat(const char *restrict pathname, struct *restrict buf);
+int fstat(int fd, struct stat *buf);
+int lstat(const char *restrict pathname, struct stat *restrict buf);
+int fstatat(int fd, const char *restrict pathname, struct stat *restrict buf, int flag);
+//所有四个函数的返回值：若成功；返回0；若出错，返回-1
 ```
