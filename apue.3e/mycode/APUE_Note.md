@@ -114,6 +114,7 @@ ssize_t write(int fd, const void *buf, size_t nbytes);
 ### 3.9 I/O的效率
 *Page* 59
 带缓冲的I/O利用了预读技术，效率更高
+一般缓冲区设置为磁盘块长度， 由st_blksize表示
 ### 3.10 文件共享
 *Page* 60~61
 不同进程有**相同或不同的进程表项和文件表项**，即不同的进程中的不同文件描述符对应不同的文件表项(不同的偏移量和状态标志)，但是可能指向**同一个V节点表项**(linux中与文件系统无关的通用i节点结构)
@@ -190,11 +191,70 @@ int fcntl(int fd, int cmd, .../*int arg*/);
 把文件描述符映射成底层物理文件的符号链接，打开相当于复制文件描述符
 ## 第四章 文件和目录
 ### 4.2 函数stat、fstat、fstatat、lstat
+* 返回文件信息
 ```C
 #include <sys/stat.h>
 int stat(const char *restrict pathname, struct *restrict buf);
 int fstat(int fd, struct stat *buf);
 int lstat(const char *restrict pathname, struct stat *restrict buf);
-int fstatat(int fd, const char *restrict pathname, struct stat *restrict buf, int flag);
+int fstatat(int dirfd, const char *restrict pathname, struct stat *restrict buf, int flag);
 //所有四个函数的返回值：若成功；返回0；若出错，返回-1
 ```
+* 对fstatat：
+	- 1: 如果pathname是相对路径，则是相对于dirfd的路径，不是相对于当前进程工作空间。
+	- 2: 如果pathname是相对路径，且dirfd为AT_FDCWD，则是相对于当前进程工作空间。
+	- 3: 如果pathname是绝对路径，则dirfd会被忽略。
+第四个参数flags可以取以下值:
+AT_EMPTY_PATH: pathname可以为空，此时获得的是dirfd所指向文件的信息。
+AT_NO_AUTOMOUNT:和挂载点有关，允许手机挂载点的属性。
+AT_SYMLINK_NOFOLLOW:如果path指向一个符号链接，则返回该链接信息。默认情况下，fstatat返回的就是链接信息。
+### 4.3 文件类型
+* Page* 76
+1. 使用S_ISREG()、S_ISDIR()系列宏**传入stat结构中的st_mode**判断类型
+2. 使用S_TYPEISMQ()、S_TYPEISSEM()系列宏**传入stat结构指针**判断是否是消息队列信号量等文件
+
+### 4.4 设置用户ID和组ID
+*Page* 78
+* 通常，有效用户ID等于实际用户ID，有效组ID等于实际组ID
+* st_mode中可用常量S_ISUID和S_ISGID测试
+### 4.5 文件访问权限
+1. 目录的可执行权限意味着目录可访问
+2. 在open函数中指定O_TRUNC标志必须对文件具有写权限
+3. 在目录中创建文件必须对该目录有写权限和可执行权限
+4. 删除现有文件必须对该文件的目录有写权限和可执行权限
+5. 如果用7个exec函数中的任何一个执行某文件， 都必须对该文件有可执行权限
+### 4.6 新文件的目录的所有权
+
+### 4.7 函数access和faccessat
+*Page* 81
+按照实际用户ID和实际组ID进行**访问权限测试**
+```C
+#include <unistd.h>
+int access(const char *pathname, int mode);
+int faccessat(int fd, const char *pathname, int mode, int flag);
+//两个函数的返回值：若成功， 返回0;若出错，返回-1
+```
+### 4.8 函数umask
+*Page* 83
+```C
+#include <sys/stat.h>
+mode_t umask(mode_t cmask);
+//返回值：之前文件模式创建屏蔽字
+```
+### 4.12 文件长度
+*Page* 89
+stat结构成员st_size表示
+### 4.13 文件截断
+```C
+#include <unistd.h>
+int truncate(const *pathname, off_t length);
+int ftrincate(int fd, off_t length);
+```
+对打开的或现有的文件截断， 如果现有文件短与目标值，增加空洞
+### 4.14 文件系统
+![磁盘与文件系统](https://www.ibm.com/developerworks/cn/linux/l-cn-vfs/4.jpg)
+创建硬链接就是增加指向该i节点的目录项，增加i节点链接计数等工作
+### 4.15 创建和解除文件链接的函数
+*Page* 93
+### 4.17 符号链接
+符号链接存在跟随符号链接和不跟随的问题
