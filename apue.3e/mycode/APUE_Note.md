@@ -258,3 +258,56 @@ int ftrincate(int fd, off_t length);
 *Page* 93
 ### 4.17 符号链接
 符号链接存在跟随符号链接和不跟随的问题
+### 4.19 文件时间
+*Page* 100
+修改时间：st_mtim
+状态更改时间：st_ctim
+## 第五章 标准I/O库
+### 5.2 流和FILE对象
+**fwide设置流的定向**
+```C
+#include <stdio.h>
+#include <wchar.h>
+int fwide(FILE *fp, int mode);
+//返回值：若流是宽定向的，返回正值;若流是字节定向的，返回负值;若流是未定向的，返回0
+```
+* 若mode参数值为负，fwide将试图使指定的流是字节定向的
+* 若mode参数值为正，fwide将试图使指定的流是宽定向的
+* 若mode参数值为正，fwide将不试图设置流的定向，但返回标识该流定向的值
+**fwide并不改变已定向流的定向，且fwide无出错返回，可在调用前清除errno值再检查errno的值**
+### 5.3 标准输入、标准输出、标准错误
+<stdio.h>定义了预定义文件指针
+### 5.4 缓冲
+```C
+#include <stdio.h>
+void setbuf(FILE *restrict fp, char *restrict buf);
+void setvbuf(FILE *restrict fp, char *restrict buf, int mode, size_t size);
+//返回值：若成功，返回0;若出错，返回非0
+```
+* 设置全缓冲、行缓冲、不带缓冲
+* 用fflush冲洗流
+### 5.5 打开流
+```C
+#include <stdio.h>
+FILE *fopen(const char *restrict pathname, const *restrict type);
+FILE freopen(const char *restrict pathname, const *restrict type, FILE *restrict fp);
+FILE *fdopen(int fd, const char *type);
+//三个函数返回值：若成功，返回文件指针;若出错，返回NULL
+```
+* fdopen使标准i/o流和文件描述符相结合
+** 如果中间没有fflush、fseek、fsetpos、rewind，则在输出后面不能直接跟随输入**
+** 如果中间没有fdeek、fsetpos、rewind，或者输入操作没有到达文尾，则在输入操作之后不能直接跟随输出**
+### 5.6 读和写流
+*Page* 121
+每个流在FILE对象维护了两个标志：
+* 出错标志;
+* 文件结束标志
+调用ferrror或feof验证是否出错或结束
+ungetc将字符压入流中（写回标准I/O缓冲区中）
+### 5.9 二进制I/O
+```C
+#include <stdio.h>
+size_t fread(void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
+size_t fwrite(const void *restrict ptr, size_t size, size_t nobj, FILE *restrict fp);
+//两函数的返回值：读或写的对象数
+```
